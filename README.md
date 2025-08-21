@@ -7,6 +7,7 @@ A Streamlit-based application for financial data analysis using LLM (Large Langu
 - Python 3.8 or higher
 - Ollama (for LLM functionality)
 - Command Prompt (cmd) - **Use cmd, not PowerShell**
+- NVIDIA GPU with 4GB+ VRAM (for training)
 
 ## Quick Start (Command Prompt)
 
@@ -14,9 +15,13 @@ A Streamlit-based application for financial data analysis using LLM (Large Langu
 
 1. **Open Command Prompt (cmd)** - Right-click in the project folder and select "Open command window here" or navigate to the project directory in cmd.
 
-2. **Run Setup**:
+2. **Run Setup** (choose one):
    ```cmd
+   # For web app only (faster setup)
    setup.bat
+   
+   # For training + web app (Windows compatible)
+   setup_windows.bat
    ```
 
 3. **Start the Application**:
@@ -109,6 +114,12 @@ ahm_finance_loan_officer_project/
 
 To train your own fine-tuned model:
 
+**For Windows (recommended):**
+```cmd
+python scripts/train_qlora_windows.py
+```
+
+**For Linux/Mac:**
 ```cmd
 python scripts/train_qlora.py
 ```
@@ -117,6 +128,7 @@ This will:
 - Load the sample dataset
 - Fine-tune TinyLlama 1.1B using QLoRA
 - Save the model to `./models/finetuned-model`
+- **Windows version uses standard PEFT (no Triton dependency)**
 
 ### Using the Trained Model
 
