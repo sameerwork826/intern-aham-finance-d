@@ -1,0 +1,11 @@
+applicant_id,age,income,loan_amount,credit_score,loan_status,rejection_reason
+1,22,25000,10000,580,Rejected,Low credit score
+2,45,60000,25000,720,Approved,
+3,34,45000,15000,640,Approved,
+4,29,32000,12000,600,Rejected,Low income
+5,52,80000,30000,780,Approved,
+6,41,55000,20000,690,Approved,
+7,37,47000,18000,660,Approved,
+8,25,28000,9000,590,Rejected,High debt-to-income ratio
+9,31,39000,14000,630,Rejected,Low savings
+10,48,70000,26000,740,Approved,
