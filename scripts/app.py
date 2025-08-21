@@ -7,6 +7,90 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
 
+def get_ollama_analysis(prompt):
+    """Get analysis from Ollama model."""
+    try:
+        # Prepare the request
+        url = "http://localhost:11434/api/generate"
+        payload = {
+            "model": "gemma:2b",
+            "prompt": prompt,
+            "stream": False
+        }
+        
+        response = requests.post(url, json=payload, timeout=60)
+        
+        if response.status_code == 200:
+            result = response.json()
+            if 'response' in result:
+                return result['response']
+            else:
+                return "❌ No response received from Ollama"
+        else:
+            return f"❌ Error: HTTP {response.status_code}"
+            
+    except requests.exceptions.ConnectionError:
+        return "❌ Cannot connect to Ollama. Make sure Ollama is running with: `ollama serve`"
+    except requests.exceptions.Timeout:
+        return "❌ Request timed out. The model is taking too long to respond."
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
+
+@st.cache_resource
+def load_finetuned_model():
+    """Load the fine-tuned model (cached)."""
+    try:
+        MODEL_PATH = "./models/finetuned-model"
+        BASE_MODEL_ID = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+        
+        # Load base model and tokenizer
+        tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_ID)
+        base_model = AutoModelForCausalLM.from_pretrained(
+            BASE_MODEL_ID,
+            torch_dtype=torch.float32,
+            device_map="cpu",
+        )
+        
+        # Load LoRA adapters
+        model = PeftModel.from_pretrained(base_model, MODEL_PATH)
+        
+        return model, tokenizer
+    except Exception as e:
+        st.error(f"Failed to load fine-tuned model: {str(e)}")
+        return None, None
+
+def get_finetuned_analysis(prompt):
+    """Get analysis from fine-tuned model."""
+    try:
+        model, tokenizer = load_finetuned_model()
+        
+        if model is None or tokenizer is None:
+            return "❌ Fine-tuned model not available. Please ensure the model is trained and saved."
+        
+        # Tokenize input
+        inputs = tokenizer(prompt, return_tensors="pt")
+        
+        # Generate response
+        with torch.no_grad():
+            outputs = model.generate(
+                **inputs,
+                max_length=512,
+                temperature=0.7,
+                do_sample=True,
+                pad_token_id=tokenizer.eos_token_id,
+            )
+        
+        # Decode response
+        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        
+        # Extract only the generated part (after the prompt)
+        response = response[len(prompt):].strip()
+        
+        return response if response else "❌ No response generated from fine-tuned model"
+        
+    except Exception as e:
+        return f"❌ Error with fine-tuned model: {str(e)}"
+
 st.set_page_config(page_title="AHM Finance Loan Officer Assistant", layout="wide")
 
 st.title("🏦 AHM Finance Loan Officer Assistant")
@@ -126,90 +210,6 @@ if st.button("🔍 Analyze Loan Application", type="primary"):
         
         st.markdown("### Analysis Results")
         st.markdown(analysis)
-
-def get_ollama_analysis(prompt):
-    """Get analysis from Ollama model."""
-    try:
-        # Prepare the request
-        url = "http://localhost:11434/api/generate"
-        payload = {
-            "model": "gemma:2b",
-            "prompt": prompt,
-            "stream": False
-        }
-        
-        response = requests.post(url, json=payload, timeout=60)
-        
-        if response.status_code == 200:
-            result = response.json()
-            if 'response' in result:
-                return result['response']
-            else:
-                return "❌ No response received from Ollama"
-        else:
-            return f"❌ Error: HTTP {response.status_code}"
-            
-    except requests.exceptions.ConnectionError:
-        return "❌ Cannot connect to Ollama. Make sure Ollama is running with: `ollama serve`"
-    except requests.exceptions.Timeout:
-        return "❌ Request timed out. The model is taking too long to respond."
-    except Exception as e:
-        return f"❌ Error: {str(e)}"
-
-@st.cache_resource
-def load_finetuned_model():
-    """Load the fine-tuned model (cached)."""
-    try:
-        MODEL_PATH = "./models/finetuned-model"
-        BASE_MODEL_ID = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-        
-        # Load base model and tokenizer
-        tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_ID)
-        base_model = AutoModelForCausalLM.from_pretrained(
-            BASE_MODEL_ID,
-            torch_dtype=torch.float32,
-            device_map="cpu",
-        )
-        
-        # Load LoRA adapters
-        model = PeftModel.from_pretrained(base_model, MODEL_PATH)
-        
-        return model, tokenizer
-    except Exception as e:
-        st.error(f"Failed to load fine-tuned model: {str(e)}")
-        return None, None
-
-def get_finetuned_analysis(prompt):
-    """Get analysis from fine-tuned model."""
-    try:
-        model, tokenizer = load_finetuned_model()
-        
-        if model is None or tokenizer is None:
-            return "❌ Fine-tuned model not available. Please ensure the model is trained and saved."
-        
-        # Tokenize input
-        inputs = tokenizer(prompt, return_tensors="pt")
-        
-        # Generate response
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_length=512,
-                temperature=0.7,
-                do_sample=True,
-                pad_token_id=tokenizer.eos_token_id,
-            )
-        
-        # Decode response
-        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        
-        # Extract only the generated part (after the prompt)
-        response = response[len(prompt):].strip()
-        
-        return response if response else "❌ No response generated from fine-tuned model"
-        
-    except Exception as e:
-        return f"❌ Error with fine-tuned model: {str(e)}"
 
 # Footer
 st.markdown("---")
