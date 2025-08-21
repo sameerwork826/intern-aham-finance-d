@@ -1,6 +1,6 @@
-# AHM Finance Loan Officer Project
+# AHM Finance Loan Officer Assistant
 
-A Streamlit-based application for financial data analysis using LLM (Large Language Model) powered insights.
+A comprehensive AI-powered loan application analysis system with dual model support - combining the speed of Ollama with the specialization of fine-tuned models for optimal loan officer decision-making.
 
 ## Prerequisites
 
@@ -64,10 +64,12 @@ A Streamlit-based application for financial data analysis using LLM (Large Langu
 
 ## Features
 
-- 📊 Financial data upload and preview
-- 🤖 LLM-powered data analysis
-- 💡 Interactive Q&A interface
-- 📈 Support for Excel and CSV files
+- 🤖 **Dual AI Models**: Choose between Ollama (fast) and fine-tuned model (specialized)
+- 📊 **File Upload**: Analyze Excel/CSV files with loan application data
+- 📝 **Manual Input**: Enter loan details manually for quick analysis
+- 🎯 **Specialized Analysis**: Fine-tuned model trained specifically for loan officer tasks
+- ⚡ **Fast Processing**: Ollama integration for quick general analysis
+- 📈 **Comprehensive Reports**: Approval recommendations, risk assessment, and documentation requirements
 
 ## Troubleshooting
 
@@ -99,58 +101,50 @@ ahm_finance_loan_officer_project/
 ├── dataset/
 │   └── sample_loan_dataset.csv
 ├── scripts/
-│   ├── app.py              # Main Streamlit application (API version)
-│   ├── train_qlora.py      # QLoRA fine-tuning script
-│   └── inference.py        # Model inference script
+│   ├── app.py              # Main Streamlit application (integrated)
+│   ├── train_qlora_cpu.py  # QLoRA fine-tuning script (CPU)
+│   └── inference_cpu.py    # Model inference script (CPU)
 ├── setup.bat               # Setup script for cmd
 ├── run_app.bat             # Application launcher for cmd
 ├── requirements.txt        # Python dependencies
 └── README.md              # This file
 ```
 
-## Training and Inference
+## AI Models
 
-### Training the Model
+### 🤖 Ollama Model (Gemma 2B)
+- **Purpose**: General-purpose financial analysis
+- **Speed**: Fast processing
+- **Requirements**: Ollama must be running (`ollama serve`)
+- **Best for**: Quick analysis and general financial insights
 
-To train your own fine-tuned model:
+### 🎯 Fine-tuned Model (TinyLlama 1.1B)
+- **Purpose**: Specialized loan officer analysis
+- **Training**: Pre-trained on loan application data
+- **Features**: Approval recommendations, risk assessment, documentation requirements
+- **Best for**: Detailed loan analysis and decision support
 
-**For Windows (recommended):**
+## Training (Optional)
+
+The fine-tuned model is already trained and ready to use. If you want to retrain:
+
 ```cmd
-python scripts/train_qlora_windows.py
-```
-
-**For Linux/Mac:**
-```cmd
-python scripts/train_qlora.py
+python scripts/train_qlora_cpu.py
 ```
 
 This will:
 - Load the sample dataset
-- Fine-tune TinyLlama 1.1B using QLoRA
+- Fine-tune TinyLlama 1.1B using QLoRA (CPU version)
 - Save the model to `./models/finetuned-model`
-- **Windows version uses standard PEFT (no Triton dependency)**
-
-### Using the Trained Model
-
-Analyze individual loan applications:
-
-```cmd
-python scripts/inference.py --age 29 --income 32000 --loan_amount 12000 --credit_score 600
-```
-
-Or analyze from CSV file:
-
-```cmd
-python scripts/inference.py --csv dataset/sample_loan_dataset.csv --row 1
-```
+- **Windows compatible** - no GPU dependencies
 
 ## Development
 
 To modify the application:
 
 1. Edit `scripts/app.py` for the main application logic
-2. Edit `scripts/train_qlora.py` for training modifications
-3. Edit `scripts/inference.py` for inference modifications
+2. Edit `scripts/train_qlora_cpu.py` for training modifications
+3. Edit `scripts/inference_cpu.py` for inference modifications
 4. Update `requirements.txt` for new dependencies
 5. Test changes by running `run_app.bat`
 

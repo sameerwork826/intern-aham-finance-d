@@ -8,6 +8,11 @@ echo Installing Python dependencies...
 pip install -r requirements.txt
 
 echo.
+echo Note: This setup includes both Ollama and fine-tuned model support.
+echo - Ollama: For general-purpose AI analysis
+echo - Fine-tuned model: For specialized loan analysis (already trained)
+
+echo.
 echo Checking if Ollama is installed...
 ollama --version >nul 2>&1
 if %errorlevel% neq 0 (
