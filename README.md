@@ -153,3 +153,4 @@ To modify the application:
 - **Always use Command Prompt (cmd) for this project**
 - The application requires an internet connection for the first run to download the LLM model
 - Large datasets may take longer to process
+# intern-aham-finance-d 
